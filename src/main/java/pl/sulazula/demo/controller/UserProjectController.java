@@ -13,7 +13,7 @@ import pl.sulazula.demo.service.UsersProjectService;
 import java.util.List;
 
 @Data
-@Controller
+@RestController
 @RequestMapping("/project-repository")
 public class UserProjectController {
 
