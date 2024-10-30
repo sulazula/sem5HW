@@ -26,6 +26,14 @@ public class UsersProjectService {
     @Autowired
     private UsersProjectRepository upr;
 
+    /**
+     *  В потоке данных связь юзер-проект преобразуется в айди юзера,
+     *  затем по айдишнику берется сам юзер в оболочке optional(user or null),
+     *  затем фильтр отбрасывает пустые optional а мапа достает из оставшихся
+     *  сами юзеры и собирает в коллекцию
+     *  ВАЖНО!!! На старте тип UsersProject, в конце - User
+     *  @param projectId
+     */
     public List<User> getUserByProjectId(Long projectId) {
         List<UsersProject> users = upr.findByProjectId(projectId);
 
@@ -37,6 +45,14 @@ public class UsersProjectService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     *  В потоке данных связь юзер-проект преобразуется в айди проекта,
+     *  затем по айдишнику берется сам проект в оболочке optional(project or null),
+     *  затем фильтр отбрасывает пустые optional а мапа достает из оставшихся
+     *  сами проекты и собирает в коллекцию
+     *  ВАЖНО!!! На старте тип UsersProject, в конце - Project
+     *  @param userId
+     */
     public List<Project> getProjectByUserId(Long userId) {
         List<UsersProject> projects = upr.findByUserId(userId);
 
@@ -48,6 +64,15 @@ public class UsersProjectService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     *
+     * @param projectId
+     * @param userId
+     * На старте метод вытягивает юзера и проект в оболочке
+     * optional(user/project or null), если какой-то из них пуст,
+     * отбрасывает исключение.
+     * Затем связь создается и сохраняется
+     */
     public void addUserToProject(Long projectId, Long userId) {
         Optional<User> user = ur.findById(userId);
         Optional<Project> project = pr.findById(projectId);
@@ -61,6 +86,12 @@ public class UsersProjectService {
         upr.save(relation);
     }
 
+    /**
+     * То же самое, что и в методе выше
+     * @see UsersProjectService#addUserToProject(Long, Long) 
+     * @param projectId
+     * @param userId
+     */
     public void removeUserFromProject(Long projectId, Long userId) {
         Optional<User> user = ur.findById(userId);
         Optional<Project> project = pr.findById(projectId);
