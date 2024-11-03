@@ -19,7 +19,7 @@ public class Project {
     private Long id;
     @Column(name = "name")
     private String name;
-    @Column(name = "desc")
+    @Column(name = "description")
     private String description;
     @Column(name = "createdDate")
     private LocalDate createdDate;
