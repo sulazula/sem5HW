@@ -1,0 +1,15 @@
+### GET users in project by projID
+GET http://localhost:8080/project-repository/users-in-project/2
+
+### POST
+POST http://localhost:8080/project-repository/add-user
+Content-Type: application/json
+
+{
+  "name": "Aliaksei",
+  "password": "qwerty222",
+  "email": "asf@gmail.com",
+  "role": "USER"
+}
+
+###

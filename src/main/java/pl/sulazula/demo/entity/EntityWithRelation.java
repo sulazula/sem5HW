@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 
 @MappedSuperclass
 public abstract class EntityWithRelation {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "relatedEntityID")
     private Long relatedEntityId;
 }

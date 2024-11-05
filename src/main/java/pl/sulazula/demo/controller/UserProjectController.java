@@ -1,16 +1,20 @@
 package pl.sulazula.demo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import pl.sulazula.demo.entity.Project;
 import pl.sulazula.demo.entity.User;
+import pl.sulazula.demo.entity.UsersProject;
 import pl.sulazula.demo.service.UsersProjectService;
 
 import java.util.List;
@@ -22,91 +26,158 @@ public class UserProjectController {
 
     @Autowired
     private UsersProjectService ups;
-    /**
-     * ResponseEntity это HTTP-Ответ сервера, то есть коды ошибок, либо статусы,
-     * а также наши собственные данные в body.
-     * То есть мы возвращаем тех же юзеров, но вместе с кодами по типу
-     * 404 NOT FOUND, 500 INTERNAL SERVER ERROR и так далее
-     *
-     * @return Response 200 OK c телом из юзеров
-     */
-    @GetMapping
-    public ResponseEntity<List<User>> getUsers(){
-        List<User> users = ups.findAll();
 
-        return ResponseEntity.ok(users);
+    @Operation(summary = "Get all users")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of users returned successfully",
+                    content = @Content(schema = @Schema(implementation = User.class))
+            ),
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "No users found",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Users not found.\" }"))
+            )
+    })
+    @GetMapping
+    public ResponseEntity<List<User>> getUsers() {
+        List<User> users = ups.findAll();
+        return users.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(users);
     }
 
-    @Operation(summary = "Get users in project by project`s ID")
+    @Operation(summary = "Get users by project ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of users returned successfully"),
-            @ApiResponse(responseCode = "404", description = "Empty, users not found")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of users returned successfully",
+                    content = @Content(schema = @Schema(implementation = User.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No users found for the specified project",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Users not found.\" }"))
+            )
     })
     @GetMapping("/users-in-project/{id}")
-    public ResponseEntity<List> getUsersByProjectId(@PathVariable("id") Long projectId) {
+    public ResponseEntity<List<User>> getUsersByProjectId(
+            @Parameter(description = "ID of the project to get users from", required = true, example = "1")
+            @PathVariable("id") Long projectId) {
         List<User> users = ups.getUserByProjectId(projectId);
-
-        if (users.isEmpty()) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(users);
+        return users.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(users);
     }
 
-    @Operation(summary = "Get project by user`s ID")
+    @Operation(summary = "Get projects by user ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of projects returned successfully"),
-            @ApiResponse(responseCode = "404", description = "Empty, projects not found")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of projects returned successfully",
+                    content = @Content(schema = @Schema(implementation = Project.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No projects found for the specified user",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Projects not found.\" }"))
+            )
     })
     @GetMapping("/projects-by-user/{id}")
-    public ResponseEntity<List> getProjectsByUserId(@PathVariable("id") Long userId) {
+    public ResponseEntity<List<Project>> getProjectsByUserId(
+            @Parameter(description = "ID of the user to get projects for", required = true, example = "2")
+            @PathVariable("id") Long userId) {
         List<Project> projects = ups.getProjectByUserId(userId);
-
-        if (projects.isEmpty()) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(projects);
+        return projects.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(projects);
     }
 
-    /**
-     *
-     * Если операция успешна, возвращается статус "СОЗДАНО" (201) с сообщением.
-     * @return ResponseBody CREATED(code 201) с телом "User added"
-     */
-    @Operation(summary = "Add user to project by proj ID and user ID")
+    @Operation(summary = "Add a new user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User added successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User created successfully",
+                    content = @Content(schema = @Schema(implementation = User.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request parameters",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Check if the data is correct.\" }"))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Backend code error.\" }"))
+            )
     })
     @PostMapping("/add-user")
-    public ResponseEntity<String> addUserToProject(@RequestParam Long projectId, @RequestParam Long userId) {
+    public ResponseEntity<String> addUser(
+            @Parameter(description = "User details to add", required = true)
+            @RequestBody User user) {
         try {
-            ups.addUserToProject(projectId, userId);
+            ups.addUser(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully");
         } catch (IllegalArgumentException e) {
-            // Вернём 400 для некорректных параметров
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request parameters");
+            return ResponseEntity.badRequest().body("Invalid request parameters");
         } catch (Exception e) {
-            e.printStackTrace();
-            // Вернём 500 для внутренних ошибок
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully");
     }
 
-    /**
-     * Если операция успешна, возвращает 204 NO CONTENT с текстом
-     * @return ResponseEntity NO CONTENT(code 204) с телом "User deleted"
-     */
-    @Operation(summary = "Delete user from project by proj ID and user ID")
+    @Operation(summary = "Add user to project")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User deleted successfully")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User added to the project successfully.",
+                    content = @Content(schema = @Schema(implementation = UsersProject.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request parameters",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Check if the data is correct.\" }"))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Backend code error.\" }"))
+            )
+    })
+    @PostMapping("/add-user-to-project")
+    public ResponseEntity<String> addUserToProject(
+            @Parameter(description = "ID of the project to add the user to", required = true, example = "2")
+            @RequestParam Long projectId,
+            @Parameter(description = "ID of the user to add", required = true, example = "5")
+            @RequestParam Long userId) {
+        try {
+            ups.addUserToProject(projectId, userId);
+            return ResponseEntity.ok().body("User added to project successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid request parameters");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(summary = "Delete user from project")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "User deleted successfully",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"User deleted.\" }"))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ID of user you want to delete not found",
+                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"User not found.\" }"))
+            )
     })
     @DeleteMapping("/delete-user-from-project")
-    public ResponseEntity<String> deleteUserFromProject(@RequestParam Long projectId, @RequestParam Long userId) {
+    public ResponseEntity<String> deleteUserFromProject(
+            @Parameter(description = "ID of the project to remove user from", required = true, example = "2")
+            @RequestParam Long projectId,
+            @Parameter(description = "ID of the user to delete", required = true, example = "5")
+            @RequestParam Long userId) {
         try {
             ups.removeUserFromProject(projectId, userId);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User deleted successfully");
     }
 }

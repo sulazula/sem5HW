@@ -70,6 +70,12 @@ public class UsersProjectService {
         return users;
     }
 
+    public User addUser(User user) {
+        ur.save(user);
+
+        return user;
+    }
+
     /**
      *
      * @param projectId
