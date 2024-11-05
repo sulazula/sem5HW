@@ -64,6 +64,12 @@ public class UsersProjectService {
                 .collect(Collectors.toList());
     }
 
+    public List<User> findAll(){
+        List<User> users = ur.findAll();
+
+        return users;
+    }
+
     /**
      *
      * @param projectId

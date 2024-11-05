@@ -30,6 +30,13 @@ public class UserProjectController {
      *
      * @return Response 200 OK c телом из юзеров
      */
+    @GetMapping
+    public ResponseEntity<List<User>> getUsers(){
+        List<User> users = ups.findAll();
+
+        return ResponseEntity.ok(users);
+    }
+
     @Operation(summary = "Get users in project by project`s ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of users returned successfully"),

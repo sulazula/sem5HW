@@ -1,6 +1,8 @@
 package pl.sulazula.demo.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import pl.sulazula.demo.entity.User;
 import pl.sulazula.demo.entity.UsersProject;
 
 import java.util.List;
