@@ -13,3 +13,4 @@ INSERT INTO users_project (projectid, userid) VALUES
                                                                    (3, 3),
                                                                    (1, 2),
                                                                    (2, 3);
+
