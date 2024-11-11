@@ -7,27 +7,35 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.sulazula.demo.entity.Project;
 import pl.sulazula.demo.entity.User;
 import pl.sulazula.demo.entity.UsersProject;
+import pl.sulazula.demo.service.UserService;
 import pl.sulazula.demo.service.UsersProjectService;
 
 import java.util.List;
 
-@Data
-@RestController
+@Controller
 @RequestMapping("/project-repository")
+@RequiredArgsConstructor
 public class UserProjectController {
 
-    @Autowired
-    private UsersProjectService ups;
+    private final UsersProjectService ups;
+    private final UserService us;
+    private final SpringDataWebAutoConfiguration springDataWebAutoConfiguration;
+    private final PasswordEncoder passwordEncoder;
 
-    @Operation(summary = "Get all users")
+    /*@Operation(summary = "Get all users")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -87,97 +95,52 @@ public class UserProjectController {
         List<Project> projects = ups.getProjectByUserId(userId);
         return projects.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(projects);
     }
+*/
+    @GetMapping
+    public String getProjects(Model model) {
+        List<Project> projects = ups.findAllProjects();
 
-    @Operation(summary = "Add a new user")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "User created successfully",
-                    content = @Content(schema = @Schema(implementation = User.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid request parameters",
-                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Check if the data is correct.\" }"))
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Backend code error.\" }"))
-            )
-    })
-    @PostMapping("/add-user")
-    public ResponseEntity<String> addUser(
-            @Parameter(description = "User details to add", required = true)
-            @RequestBody User user) {
-        try {
-            ups.addUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid request parameters");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        model.addAttribute("projects", projects);
+        return "project-repository";
     }
 
-    @Operation(summary = "Add user to project")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "User added to the project successfully.",
-                    content = @Content(schema = @Schema(implementation = UsersProject.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid request parameters",
-                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Check if the data is correct.\" }"))
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"Backend code error.\" }"))
-            )
-    })
-    @PostMapping("/add-user-to-project")
-    public ResponseEntity<String> addUserToProject(
-            @Parameter(description = "ID of the project to add the user to", required = true, example = "2")
-            @RequestParam Long projectId,
-            @Parameter(description = "ID of the user to add", required = true, example = "5")
-            @RequestParam Long userId) {
-        try {
-            ups.addUserToProject(projectId, userId);
-            return ResponseEntity.ok().body("User added to project successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid request parameters");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    @GetMapping("/users/{id}")
+    public String getUsers(@PathVariable Long id, Model model) {
+        List<User> users = ups.getUserByProjectId(id);
+        Project project = ups.getProjectById(id);
+
+        model.addAttribute("project", project);
+        model.addAttribute("users", users);
+        return "users-in-project";
     }
 
-    @Operation(summary = "Delete user from project")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "User deleted successfully",
-                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"User deleted.\" }"))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "ID of user you want to delete not found",
-                    content = @Content(examples = @ExampleObject(value = "{ \"message\": \"User not found.\" }"))
-            )
-    })
-    @DeleteMapping("/delete-user-from-project")
-    public ResponseEntity<String> deleteUserFromProject(
-            @Parameter(description = "ID of the project to remove user from", required = true, example = "2")
-            @RequestParam Long projectId,
-            @Parameter(description = "ID of the user to delete", required = true, example = "5")
-            @RequestParam Long userId) {
-        try {
-            ups.removeUserFromProject(projectId, userId);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    @GetMapping("/create-user")
+    public String createUser(Model model) {
+        model.addAttribute("user", new User());
+
+        return "user-create";
+    }
+    @PostMapping("/create-user")
+    public String createUser(@ModelAttribute User user) {
+        String password = passwordEncoder.encode(user.getPassword());
+        user.setPassword(password);
+
+        us.addUser(user);
+
+        return "redirect:/dashboard";
+    }
+
+    @GetMapping("/delete-user/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        us.deleteUserById(id);
+
+        return "redirect:/dashboard";
+    }
+
+    @PostMapping("/user-delete/{id}/{pid}")
+    public String deleteUser(@PathVariable Long id, @PathVariable Long pid) {
+        ups.removeUserFromProject(pid, id);
+
+        return "redirect:/project-repository/users/" + pid;
     }
 }

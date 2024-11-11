@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/dashboard-admin.css">
+</head>
+<body>
+<div class="userslist">
+    <h2>Список всех пользователей:</h2>
+    <a th:href="@{/project-repository}">Check projects</a>
+    <a th:href="@{/project-repository/create-user}">Create user</a>
+
+    <table>
+        <tr>
+            <td>USERNAME</td>
+            <td>EMAIL</td>
+            <td>ROLE</td>
+            <td>ACTION</td>
+        </tr>
+        <tr th:each="usr : ${usersList}">
+            <th th:text="${usr.username}"></th>
+            <td th:text="${usr.email}"></td>
+            <td th:text="${usr.role}"></td>
+            <td>
+                <form th:action="@{/project-repository/delete-user/{id}(id = ${usr.getId()})}" method="post">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>

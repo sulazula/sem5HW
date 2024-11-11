@@ -68,9 +68,4 @@ public class User implements UserDetails {
                 .map(r -> (GrantedAuthority) () -> "ROLE_" + r.name())
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
 }

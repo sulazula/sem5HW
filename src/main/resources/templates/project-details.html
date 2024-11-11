@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Project Details</title>
+    <link rel="stylesheet" href="/project-details.css">
+</head>
+<body>
+<h1>Project Details</h1>
+
+<div class="details">
+    <p><strong>ID:</strong> <span th:text="${project.id}"></span></p>
+    <p><strong>Name:</strong> <span th:text="${project.name}"></span></p>
+    <p><strong>Description:</strong> <span th:text="${project.description}"></span></p>
+    <p><strong>Created Date:</strong> <span th:text="${project.createdDate}"></span></p>
+</div>
+
+<div class="button">
+    <!-- Кнопка возврата на дашборд -->
+    <a th:href="@{/dashboard}">Back to Dashboard</a>
+</div>
+</body>
+</html>

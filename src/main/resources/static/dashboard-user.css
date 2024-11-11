@@ -1,0 +1,61 @@
+/* Основные стили для страницы с проектами */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f9;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+div {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+h2 {
+    color: #007bff;
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Стили для списка проектов */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    margin-bottom: 15px;
+}
+
+li a {
+    text-decoration: none;
+    display: block;
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    color: #007bff;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 16px;
+}
+
+li a:hover {
+    background-color: #d6dbdf;
+    color: #0056b3;
+}
+
+/* Обработка эффектов наведения для ссылок */
+li a:focus,
+li a:hover {
+    outline: none;
+    background-color: #d6dbdf; /* светлый фон при наведении */
+    color: #0056b3; /* темно-синий текст */
+}
+
+/* Удостоверимся, что ссылки находятся в одном ряду */
+ul li a {
+    display: inline-block;
+}

@@ -3,9 +3,6 @@ package pl.sulazula.demo.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import pl.sulazula.demo.entity.Project;
 import pl.sulazula.demo.entity.User;
@@ -67,16 +64,15 @@ public class UsersProjectService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> findAll(){
-        List<User> users = ur.findAll();
+    public Project getProjectById(Long projectId) {
 
-        return users;
+        return pr.findById(projectId).isPresent() ? pr.findById(projectId).get() : null;
     }
 
-    public User addUser(User user) {
-        ur.save(user);
+    public List<Project> findAllProjects(){
+        List<Project> projects = pr.findAll();
 
-        return user;
+        return projects;
     }
 
     /**
