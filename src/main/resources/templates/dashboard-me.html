@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Dashboard</title>
+  <link rel="stylesheet" href="/dashboard-me.css">
+</head>
+<body>
+<!-- Заголовок страницы -->
+<h1>Welcome, <span th:text="${user.username}">User</span>!</h1>
+
+<!-- Информация о пользователе -->
+<div class="user-info">
+  <h2>My Account Details</h2>
+  <p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
+  <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+  <p><strong>Role:</strong> <span th:text="${user.role}"></span></p>
+</div>
+
+<!-- Секция для смены пароля -->
+<div class="change-password">
+  <h2>Change Password</h2>
+  <form th:action="@{/change-password}" method="post">
+    <label for="current-password">Current Password</label>
+    <input type="password" id="current-password" name="oldPassword" required>
+    <br>
+    <label for="new-password">New Password</label>
+    <input type="password" id="new-password" name="newPassword" required>
+    <br>
+    <label for="confirm-password">Confirm New Password</label>
+    <input type="password" id="confirm-password" name="confirmPassword" required>
+    <br>
+    <button type="submit">Update Password</button>
+  </form>
+</div>
+
+<!-- Секция для отображения проектов пользователя -->
+<div class="projects-section">
+  <h2>Your Projects</h2>
+  <ul>
+    <li th:each="project : ${projects}">
+      <a th:href="@{/dashboard/project/{id}(id=${project.id})}" th:text="${project.name}"></a>
+    </li>
+  </ul>
+</div>
+
+<!-- Кнопка выхода из аккаунта -->
+<div class="logout">
+  <form th:action="@{/logout}" method="post">
+    <button type="submit">Log Out</button>
+  </form>
+</div>
+</body>
+</html>

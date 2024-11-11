@@ -2,6 +2,7 @@ package pl.sulazula.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.sulazula.demo.entity.User;
 import pl.sulazula.demo.repository.UserRepository;
@@ -14,6 +15,8 @@ public class UserService {
 
     @Autowired
     private UserRepository ur;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public User addUser(User user) {
         ur.save(user);
@@ -35,6 +38,16 @@ public class UserService {
     public Optional<User> findUserByUsername(String username) {
 
         return ur.findUserByUsername(username);
+    }
+
+    public boolean confirmPassword(User user, String confirmPassword) {
+        return passwordEncoder.matches(confirmPassword, user.getPassword());
+    }
+
+    public void updatePassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        ur.save(user);
     }
 
 }

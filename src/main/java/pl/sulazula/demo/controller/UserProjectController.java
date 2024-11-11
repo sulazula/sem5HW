@@ -1,26 +1,11 @@
 package pl.sulazula.demo.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.sulazula.demo.entity.Project;
 import pl.sulazula.demo.entity.User;
-import pl.sulazula.demo.entity.UsersProject;
-import pl.sulazula.demo.service.UserService;
 import pl.sulazula.demo.service.UsersProjectService;
 
 import java.util.List;
@@ -31,9 +16,6 @@ import java.util.List;
 public class UserProjectController {
 
     private final UsersProjectService ups;
-    private final UserService us;
-    private final SpringDataWebAutoConfiguration springDataWebAutoConfiguration;
-    private final PasswordEncoder passwordEncoder;
 
     /*@Operation(summary = "Get all users")
     @ApiResponses(value = {
@@ -112,29 +94,6 @@ public class UserProjectController {
         model.addAttribute("project", project);
         model.addAttribute("users", users);
         return "users-in-project";
-    }
-
-    @GetMapping("/create-user")
-    public String createUser(Model model) {
-        model.addAttribute("user", new User());
-
-        return "user-create";
-    }
-    @PostMapping("/create-user")
-    public String createUser(@ModelAttribute User user) {
-        String password = passwordEncoder.encode(user.getPassword());
-        user.setPassword(password);
-
-        us.addUser(user);
-
-        return "redirect:/dashboard";
-    }
-
-    @GetMapping("/delete-user/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        us.deleteUserById(id);
-
-        return "redirect:/dashboard";
     }
 
     @PostMapping("/user-delete/{id}/{pid}")

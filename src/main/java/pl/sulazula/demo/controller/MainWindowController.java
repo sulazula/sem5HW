@@ -38,11 +38,27 @@ public class MainWindowController {
         }
         if (current.getRole() == AppRole.ADMIN) {
             List<User> users = userService.findAll();
+            users.remove(current);
 
             model.addAttribute("usersList", users);
             return "dashboard-admin";
         }
         return "error";
+    }
+
+    @GetMapping("/me")
+    public String me(Principal principal, Model model) {
+        User current = userService
+                .findUserByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Project> projects = usersProjectService
+                .getProjectByUserId(current.getId());
+
+        model.addAttribute("user", current);
+        model.addAttribute("projects", projects);
+
+        return "dashboard-me";
     }
 
     @GetMapping("/project/{id}")

@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="/users-in-project.css">
 </head>
 <body>
+<a th:href="@{/dashboard}">Back to dashboard</a>
+<a th:href="@{/project-repository}">Back to projects</a>
+<h1 th:text="${project.getName()}"></h1>
 <table>
     <tr>
         <td>ID</td>
@@ -19,7 +22,6 @@
         <td th:text="${usr.username}"></td>
         <td th:text="${usr.email}"></td>
         <td th:text="${usr.role}"></td>
-        <td>
         <td>
         <form th:action="@{/project-repository/user-delete/{id}/{pid}(id=${usr.id}, pid=${project.id})}" method="post">
             <button type="submit">Delete</button>

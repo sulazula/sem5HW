@@ -9,7 +9,8 @@
 <div class="userslist">
     <h2>Список всех пользователей:</h2>
     <a th:href="@{/project-repository}">Check projects</a>
-    <a th:href="@{/project-repository/create-user}">Create user</a>
+    <a th:href="@{create-user}">Create user</a>
+    <a th:href="@{/dashboard/me}">My account</a>
 
     <table>
         <tr>
@@ -23,7 +24,7 @@
             <td th:text="${usr.email}"></td>
             <td th:text="${usr.role}"></td>
             <td>
-                <form th:action="@{/project-repository/delete-user/{id}(id = ${usr.getId()})}" method="post">
+                <form th:action="@{/delete-user/{id}(id = ${usr.getId()})}" method="post">
                     <button type="submit">Delete</button>
                 </form>
             </td>
